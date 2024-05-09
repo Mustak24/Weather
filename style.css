@@ -24,7 +24,6 @@ button.normal {
   border-radius: 10px;
   font-weight: 600;
   font-size: larger;
-  font-family: 'Courier New', Courier, monospace;
 }
 
 main {
@@ -297,4 +296,34 @@ main::after {
 
 #min_temp::after {
   width: 50%;
+}
+
+#city_box{
+    opacity: 0;
+    transform: scale(0);
+    width: fit-content; height: fit-content;
+    max-width: 350px; max-height: 200px;
+    justify-content: flex-start;
+    background-color: transperent;
+    border: 5px solid rgba(255, 255, 255, 0.5);;
+    box-sizing: border-box;
+    position: absolute;;
+    transition: all .5s ease-out;
+}
+
+#city_box input{
+  background-color: rgba(255, 255, 255, 0.2);
+  height: 30px;box-sizing: border-box;
+  width: 180px;
+  border: none;
+  padding: 3px 8px;
+  outline: none;
+}
+#city input::placeholder{color: black;}
+
+#city_box button{
+  background-color: rgba(255, 255, 255, 0.4);
+  height: 30px;box-sizing: border-box;
+  width: 60px;
+  border: none
 }

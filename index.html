@@ -16,10 +16,20 @@
     <div id="path">
       <div id="img" class="night"></div>
     </div>
-    <div id="temp" class="flex">0°C<span>Udaipur</span></div>
+    <div id="temp" class="flex">
+      <span>0°C</span>
+      <span onclick="city_select()"></span>
+    </div>
     <div id="forcast"></div>
   </main>
-  <button id="Refresh" class="normal" onclick="Refresh()">Refresh</button>
+  <button id="Refresh" class="normal">Refresh</button>
+  
+  <div class="flex column" id="city_box">
+    <div class='flex row'>
+    <input plaseholder='Search City'>
+    <button>Enter</button>
+    </div>
+  </div>
 </body>
 <script src="script.js"></script>
   

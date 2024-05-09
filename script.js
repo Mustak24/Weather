@@ -6,77 +6,30 @@ const img = document.getElementById("img");
 const main = document.getElementById("main");
 const max_temp = document.getElementById('max_temp');
 const min_temp = document.getElementById('min_temp');
+const city_box = document.getElementById('city_box');
 const max_t = [document.styleSheets[0].cssRules[26], [document.styleSheets[0].cssRules[27]]]
 const min_t = [document.styleSheets[0].cssRules[29], [document.styleSheets[0].cssRules[30]]]
 
-setTimeout(() => {
-  temp.style.transform = "scale(1)";
-  path.style.transform = "rotateZ(-20deg) scale(1)"
-  for (let div of forcast.children) {
-    div.style.transform = "scale(1)";
-    div.style.top = "0";
-    div.style.opacity = "1"
-  }
-  start()
-}, 1);
 
-for (let i = 0; i < 30; i++) forcast.innerHTML += `<div class="flex">...</div>`
-
-function start() {
-  try {
-    var forcast_data = JSON.parse(localStorage.getItem('forcasting_data'))['statistics'].data;
-    temp.innerHTML = '<span>' + (JSON.parse(localStorage.getItem('today_temp'))).temp + "°C" + '</span><span>Udaipur</span>'
-    for (let i = 0; i < 30; i++) {
-      let date = forcast_data[i].day.split("-")
-      forcast.children[i].innerHTML = `<b>${date[2] + "-" + date[1]}</b></b><b>${forcast_data[i]['temperature']['avg']}</b>`
-    }
-  }
-  catch (e) {
-    forcast.innerHTML += `<div class="flex"><b>..?</b></div>`
-    temp.textContent = "..?°C"
-  }
-
-  try {
-    var min_temp1 = (forcast_data[0]['temperature']['avg_min'] + forcast_data[0]['temperature']['record_min']) / 2 + 0.5;
-    min_temp.querySelector('b').textContent = parseInt(min_temp1);
-    if (min_temp1 > 20) min_t[0].style.width = `${70 - min_temp1}%`;
-    else min_t[1].style.width = `${70 - min_temp1}%`;
-
-    var max_temp1 = (forcast_data[0]['temperature']['avg_max'] + forcast_data[0]['temperature']['record_max']) / 2 + 0.5;
-    max_temp.querySelector('b').textContent = parseInt(max_temp1);
-    if (max_temp1 > 20) max_t[0].style.width = `${70 - max_temp1}%`;
-    else max_t[1].style.width = `${70 - max_temp1}%`;
-  }
-  catch (error) { console.log(error); }
-
-  let hr = new Date().getHours()
-  if (hr >= 3 && hr < 10) {
-    img.className = "morning";
-    main.className = "flex morning"
-  }
-  else if (hr >= 10 && hr < 16) {
-    img.className = "afternoon"
-    main.className = "flex afternoon"
-  }
-  else if (hr >= 16 && hr < 20) {
-    img.className = "morning"
-    main.className = "flex morning"
-  }
-  else if (hr >= 20 && hr < 0) {
-    img.className = "night"
-    main.className = "flex night"
-  }
-  else if (hr >= 0 && hr < 3) {
-    img.className = "dark_night"
-    main.className = "flex dark_night"
-  }
-
+async function city_xy(city){
+  let url = `https://nominatim.openstreetmap.org/search?q=${city}&format=json`;
+  try{
+    let data = await fetch(url);
+    data = await data.json();
+    let xy = await [data[0]['boundingbox'][1], data[0]['boundingbox'][2]]
+    localStorage.setItem('city_x', xy[0])
+    localStorage.setItem('city_y', xy[1])
+    localStorage.setItem('city name', city)
+    return xy;
+  }catch(e){console.log(e)}
 }
 
+const fech_wea_data = async (city='Udaipur') => {
 
-const forcasting = async () => {
-  const url = 'https://ai-weather-by-meteosource.p.rapidapi.com/weather_statistics?lat=24.525049&lon=73.677116&units=auto';
-  const options = {
+  let xy = await city_xy(city);
+
+  let url = `https://ai-weather-by-meteosource.p.rapidapi.com/weather_statistics?lat=${await xy[0]}&lon=${await xy[1]}&units=auto`;
+  let options = {
     method: 'GET',
     headers: {
       'X-RapidAPI-Key': '91eb7226demsh82d0c268321505ep12a0e2jsn7fa4f2a7843c',
@@ -85,35 +38,65 @@ const forcasting = async () => {
   };
 
   try {
-    let data = await fetch(url, options).catch((e) => console.log(e));
-    let fulldata = await data.json();
-    localStorage.setItem('forcasting_data', JSON.stringify(fulldata))
-    return fulldata;
-  }
-  catch (error) { console.log(error); return; }
+    let data = await fetch(url, options);
+    localStorage.setItem('forcasting_data', await data.text())
+  }catch (error) {console.log(error);}
+  return Refill_data()
 }
 
-const today_temp = async (city) => {
-  const url = `https://weather-by-api-ninjas.p.rapidapi.com/v1/weather?city=${city}`;
-  const options = {
-    method: 'GET',
-    headers: {
-      'X-RapidAPI-Key': '91eb7226demsh82d0c268321505ep12a0e2jsn7fa4f2a7843c',
-      'X-RapidAPI-Host': 'weather-by-api-ninjas.p.rapidapi.com'
+
+function background_theme(){
+  let theme_list = {
+    '3-10':['morning', 'flex morning'],
+    '10-16':['afternoon', 'flex afternoon'],
+    '16-20':['morning', 'flex morning'],
+    '20-0':['night', 'flex noght'],
+    '0-3':['dark_night', 'flex dark_night']
+  }
+
+  let hr = new Date().getHours()
+  for(let i of Object.keys(theme_list)){
+    let time = i.split('-');
+    if(parseInt(time[0])<hr && parseInt(time[1])<hr){
+      img.className = theme_list[time.join('-')][0]
+      main.className = theme_list[time.join('-')][1]
     }
-  };
-
-  try {
-    let data = await fetch(url, options).catch((e) => console.log(e));
-    let fulldata = await data.json();
-    localStorage.setItem('today_temp', JSON.stringify(fulldata))
-    return fulldata;
   }
-  catch (error) { console.log(error); return; }
 }
 
-async function Refresh() {
-  for (let i of forcast.children) i.innerHTML = "..."
+function maxmin_temp_level(){
+  try {
+    let maxmin_temp = JSON.parse(localStorage.getItem('forcasting_data'))['statistics'].data[0]['temperature'];
+    var min_temp1 = (maxmin_temp['avg_min'] + maxmin_temp['record_min']) / 2 + 0.5;
+    min_temp.querySelector('b').textContent = parseInt(min_temp1);
+    if (min_temp1 > 20) min_t[0].style.width = `${70 - min_temp1}%`;
+    else min_t[1].style.width = `${70 - min_temp1}%`;
+
+    var max_temp1 = (maxmin_temp['avg_max'] + maxmin_temp['record_max']) / 2 + 0.5;
+    max_temp.querySelector('b').textContent = parseInt(max_temp1);
+    if (max_temp1 > 20) max_t[0].style.width = `${70 - max_temp1}%`;
+    else max_t[1].style.width = `${70 - max_temp1}%`;
+  }
+  catch (error) {console.log(error);}
+}
+function forcast_data_fill() {
+  try {
+    let forcast_data = JSON.parse(localStorage.getItem('forcasting_data'))['statistics'].data;
+    temp.innerHTML = '<span>' + forcast_data[0]['temperature']['avg'] + "°C" + '</span><span onclick="city_select()">' + localStorage.getItem('city name') + '</span>'
+    for (let i = 0; i < 30; i++) {
+      let date = forcast_data[i].day.split("-")
+      forcast.children[i].innerHTML = `<b>${date[2] + "-" + date[1]}</b></b><b>${forcast_data[i]['temperature']['avg']}</b>`
+    }
+  }
+  catch (e) {
+    console.log(e)
+    forcast.innerHTML += `<div class="flex"><b>..?</b></div>`
+    temp.textContent = "..?°C"
+  }
+}
+
+
+function Restart_anime() {  
   try {
     for (let i = 0; i < 2; i++) {
       min_t[i].style.width = `${50}%`
@@ -121,19 +104,64 @@ async function Refresh() {
     }
   }
   catch (e) { console.log(e) }
-  try {
-    await forcasting();
-    await today_temp('udaipur');
-  }
-  catch (e) {
-    console.log(e);
-    temp.textContent = "..?°C";
-    for (let i in forcast.children) forcast.children[i].innerHTML = `<b>..?</b>`;
-    return;
-  }
-  return start()
 }
+
+function Refill_data(){
+  Restart_anime()
+  background_theme();
+  maxmin_temp_level();
+  forcast_data_fill();
+}
+
 
 forcast.addEventListener("wheel", (e) => {
   forcast.scrollLeft += e.deltaY * 3
 });
+
+
+function city_select(){
+  let input = city_box.querySelector('input');
+  input.focus();
+  input.value = '';
+  city_box.style.transform = "scale(1)";
+  city_box.style.opacity = "1";
+  main.style.filter = "blur(5px)";
+  document.body.querySelector('button').style.filter = "blur(5px)";
+
+  let anime = ()=>{
+    city_box.style.transform = "scale(0)";
+    city_box.style.opacity = "0";
+    main.style.filter = 'blur(0)';
+    document.body.querySelector('button').style.filter = "blur(0px)";
+  }
+
+  city_box.querySelector('button').addEventListener('click',()=>{
+    anime();
+    Refill_animation();
+    fech_wea_data(input.value);
+  })
+
+  input.addEventListener('keypress', (e)=>{
+    if(e.key == 'Enter'){
+      anime();
+      Refill_animation();
+      fech_wea_data(input.value);
+    }
+  })
+}
+
+function Refill_animation(){
+  temp.style.transform = "scale(1)";
+  path.style.transform = "rotateZ(-20deg) scale(1)";
+  for (let div of forcast.children) {
+    div.style.transform = "scale(1)";
+    div.style.top = "0";
+    div.style.opacity = "1";
+  }
+}
+
+(()=>{
+  for (let i = 0; i < 30; i++) forcast.innerHTML += `<div class="flex">...</div>`;
+  city_select();
+})()
+
