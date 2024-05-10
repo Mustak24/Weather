@@ -11,9 +11,9 @@ const max_t = [document.styleSheets[0].cssRules[26], [document.styleSheets[0].cs
 const min_t = [document.styleSheets[0].cssRules[29], [document.styleSheets[0].cssRules[30]]]
 
 
-async function city_xy(city){
+async function city_xy(city) {
   let url = `https://nominatim.openstreetmap.org/search?q=${city}&format=json`;
-  try{
+  try {
     let data = await fetch(url);
     data = await data.json();
     let xy = await [data[0]['boundingbox'][1], data[0]['boundingbox'][2]]
@@ -21,18 +21,18 @@ async function city_xy(city){
     localStorage.setItem('city_y', xy[1])
     localStorage.setItem('city name', city)
     return xy;
-  }catch(e){console.log(e)}
+  } catch (e) { console.log(e) }
 }
 
-const fech_wea_data = async (city='Udaipur') => {
+const fech_wea_data = async (city = 'Udaipur') => {
 
   let xy = await city_xy(city);
 
-  let url = `https://ai-weather-by-meteosource.p.rapidapi.com/weather_statistics?lat=${await xy[0]}&lon=${await xy[1]}&units=auto`;
+  url = `https://ai-weather-by-meteosource.p.rapidapi.com/weather_statistics?lat=${xy[0]}&lon=${xy[1]}&units=auto`;
   let options = {
     method: 'GET',
     headers: {
-      'X-RapidAPI-Key': '91eb7226demsh82d0c268321505ep12a0e2jsn7fa4f2a7843c',
+      'X-RapidAPI-Key': '5433fa9e9cmsh5bb8c9bcec984fdp189595jsnb07e5d636a22',
       'X-RapidAPI-Host': 'ai-weather-by-meteosource.p.rapidapi.com'
     }
   };
@@ -40,31 +40,31 @@ const fech_wea_data = async (city='Udaipur') => {
   try {
     let data = await fetch(url, options);
     localStorage.setItem('forcasting_data', await data.text())
-  }catch (error) {console.log(error);}
+  } catch (error) { console.log(error); }
   return Refill_data()
 }
 
 
-function background_theme(){
+function background_theme() {
   let theme_list = {
-    '3-10':['morning', 'flex morning'],
-    '10-16':['afternoon', 'flex afternoon'],
-    '16-20':['morning', 'flex morning'],
-    '20-0':['night', 'flex noght'],
-    '0-3':['dark_night', 'flex dark_night']
+    '3-10': ['morning', 'flex morning'],
+    '10-16': ['afternoon', 'flex afternoon'],
+    '16-20': ['morning', 'flex morning'],
+    '20-0': ['night', 'flex noght'],
+    '0-3': ['dark_night', 'flex dark_night']
   }
 
   let hr = new Date().getHours()
-  for(let i of Object.keys(theme_list)){
+  for (let i of Object.keys(theme_list)) {
     let time = i.split('-');
-    if(parseInt(time[0])<hr && parseInt(time[1])<hr){
+    if (parseInt(time[0]) < hr && parseInt(time[1]) < hr) {
       img.className = theme_list[time.join('-')][0]
       main.className = theme_list[time.join('-')][1]
     }
   }
 }
 
-function maxmin_temp_level(){
+function maxmin_temp_level() {
   try {
     let maxmin_temp = JSON.parse(localStorage.getItem('forcasting_data'))['statistics'].data[0]['temperature'];
     var min_temp1 = (maxmin_temp['avg_min'] + maxmin_temp['record_min']) / 2 + 0.5;
@@ -77,8 +77,9 @@ function maxmin_temp_level(){
     if (max_temp1 > 20) max_t[0].style.width = `${70 - max_temp1}%`;
     else max_t[1].style.width = `${70 - max_temp1}%`;
   }
-  catch (error) {console.log(error);}
+  catch (error) { console.log(error); }
 }
+
 function forcast_data_fill() {
   try {
     let forcast_data = JSON.parse(localStorage.getItem('forcasting_data'))['statistics'].data;
@@ -96,7 +97,7 @@ function forcast_data_fill() {
 }
 
 
-function Restart_anime() {  
+function Restart_anime() {
   try {
     for (let i = 0; i < 2; i++) {
       min_t[i].style.width = `${50}%`
@@ -106,7 +107,7 @@ function Restart_anime() {
   catch (e) { console.log(e) }
 }
 
-function Refill_data(){
+function Refill_data() {
   Restart_anime()
   background_theme();
   maxmin_temp_level();
@@ -119,7 +120,7 @@ forcast.addEventListener("wheel", (e) => {
 });
 
 
-function city_select(){
+function city_select() {
   let input = city_box.querySelector('input');
   input.focus();
   input.value = '';
@@ -128,21 +129,21 @@ function city_select(){
   main.style.filter = "blur(5px)";
   document.body.querySelector('button').style.filter = "blur(5px)";
 
-  let anime = ()=>{
+  let anime = () => {
     city_box.style.transform = "scale(0)";
     city_box.style.opacity = "0";
     main.style.filter = 'blur(0)';
     document.body.querySelector('button').style.filter = "blur(0px)";
   }
 
-  city_box.querySelector('button').addEventListener('click',()=>{
+  city_box.querySelector('button').addEventListener('click', () => {
     anime();
     Refill_animation();
     fech_wea_data(input.value);
   })
 
-  input.addEventListener('keypress', (e)=>{
-    if(e.key == 'Enter'){
+  input.addEventListener('keypress', (e) => {
+    if (e.key == 'Enter') {
       anime();
       Refill_animation();
       fech_wea_data(input.value);
@@ -150,7 +151,7 @@ function city_select(){
   })
 }
 
-function Refill_animation(){
+function Refill_animation() {
   temp.style.transform = "scale(1)";
   path.style.transform = "rotateZ(-20deg) scale(1)";
   for (let div of forcast.children) {
@@ -160,7 +161,7 @@ function Refill_animation(){
   }
 }
 
-(()=>{
+(() => {
   for (let i = 0; i < 30; i++) forcast.innerHTML += `<div class="flex">...</div>`;
   city_select();
 })()
