@@ -1,31 +1,28 @@
-import data from './in.json' assert{type:'json'};
+import data from './in.json' assert{type: 'json'};
 const list = document.getElementById('city_box');
 
+
 var city = []
-Object.values(data).splice(1).map( (e)=>{ e.map( (e)=>{city.push(e)} ) } );
-Object.keys(data).splice(1).map( (e)=>{city.push(e)} );
+Object.values(data).splice(1).map((e) => { e.map((e) => { city.push(e) }) });
+Object.keys(data).splice(1).map((e) => { city.push(e) });
 
-for(let i of city) list.querySelector('ul').innerHTML +=`<li>${i}</li>`
+for (let i of city) list.querySelector('ul').innerHTML += `<li>${i}</li>`
 
-function help(){
+function help() {
     let input = list.querySelector('input').value;
-    let city_list =  city.filter((e)=>{
-    return e.toLowerCase().includes((input).toLowerCase())
+    let city_list = city.filter((e) => {
+        return e.toLowerCase().includes((input).toLowerCase())
     })
-    if(city_list == '') list.querySelector('ul').innerHTML = '<li>Not-Found</li>'
-    else{
+    if (city_list == '') list.querySelector('ul').innerHTML = '<li>Not-Found</li>'
+    else {
         list.querySelector('ul').innerHTML = ``
-        for(let i of city_list){
-            list.querySelector('ul').innerHTML +=`<li>${i}</li>`
+        for (let i of city_list) {
+            list.querySelector('ul').innerHTML += `<li>${i}</li>`
         }
     }
 }
 
-list.querySelector('input').addEventListener('keyup', ()=>{    
-    setTimeout(help,1500);
+list.querySelector('input').addEventListener('keyup', () => {
+    setTimeout(help, 1500);
 });
 
-
-document.getElementById('Refresh').addEventListener('click', ()=>{
-    fech_wea_data(localStorage.getItem('xy'))
-})

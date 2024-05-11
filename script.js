@@ -41,7 +41,6 @@ const fech_wea_data = async (xy) => {
   return Refill_data()
 }
 
-
 function background_theme() {
   let theme_list = {
     '3-10': ['morning', 'flex morning'],
@@ -181,11 +180,16 @@ async function live_loca(){
       Refill_animation();
       localStorage.setItem('city name', 'Live loca..')
       localStorage.setItem('xy',xy);
-      return fech_wea_data(xy);
+      return fech_wea_data(...xy);
     },(e)=>{console.log(e)})
   }
   else console.log('not')
 }
 
+
+document.getElementById('Refresh').addEventListener('click', ()=>{
+  console.log(localStorage.getItem('xy').split(','))
+  fech_wea_data(...localStorage.getItem('xy').split(','))
+})
 
 
