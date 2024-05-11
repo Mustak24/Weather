@@ -24,11 +24,9 @@ async function city_xy(city) {
   } catch (e) { console.log(e) }
 }
 
-const fech_wea_data = async (city = 'Udaipur') => {
+const fech_wea_data = async (xy) => {
 
-  let xy = await city_xy(city);
-
-  url = `https://ai-weather-by-meteosource.p.rapidapi.com/weather_statistics?lat=${xy[0]}&lon=${xy[1]}&units=auto`;
+  let url =  await `https://ai-weather-by-meteosource.p.rapidapi.com/weather_statistics?lat=${await xy[0]}&lon=${await xy[1]}&units=auto`;
   let options = {
     method: 'GET',
     headers: {
@@ -100,8 +98,8 @@ function forcast_data_fill() {
 function Restart_anime() {
   try {
     for (let i = 0; i < 2; i++) {
-      min_t[i].style.width = `${50}%`
-      max_t[i].style.width = `${50}%`
+      min_t[i].style.width = `50%`
+      max_t[i].style.width = `50%`
     }
   }
   catch (e) { console.log(e) }
@@ -120,7 +118,7 @@ forcast.addEventListener("wheel", (e) => {
 });
 
 
-function city_select() {
+async function city_select() {
   let input = city_box.querySelector('input');
   input.focus();
   input.value = '';
@@ -136,19 +134,19 @@ function city_select() {
     document.body.querySelector('button').style.filter = "blur(0px)";
   }
 
-  city_box.querySelector('button').addEventListener('click', () => {
+  city_box.querySelector('button').addEventListener('click', (async() => {
     anime();
     Refill_animation();
-    fech_wea_data(input.value);
-  })
+    fech_wea_data(await city_xy(input.value));
+  }))
 
-  input.addEventListener('keypress', (e) => {
+  input.addEventListener('keypress', (async(e) => {
     if (e.key == 'Enter') {
       anime();
       Refill_animation();
-      fech_wea_data(input.value);
+      fech_wea_data(await city_xy(input.value));
     }
-  })
+  }))
 }
 
 function Refill_animation() {
@@ -165,4 +163,25 @@ function Refill_animation() {
   for (let i = 0; i < 30; i++) forcast.innerHTML += `<div class="flex">...</div>`;
   city_select();
 })()
+
+
+city_box.querySelector('ul').addEventListener('click', (e)=>{
+  let input = city_box.querySelector('input');
+  if(e.target.localName == 'li'){
+    input.value = e.target.textContent;
+    input.focus()
+  }
+},true);
+
+async function live_loca(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition((ans)=>{
+      let xy = await [ans.coords.latitude, ans.coords.longitude]
+      return fech_wea_data(xy);
+    },(e)=>{console.log(e)})
+  }
+  else console.log('not')
+}
+
+
 
