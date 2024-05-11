@@ -17,9 +17,8 @@ async function city_xy(city) {
     let data = await fetch(url);
     data = await data.json();
     let xy = await [data[0]['boundingbox'][1], data[0]['boundingbox'][2]]
-    localStorage.setItem('city_x', xy[0])
-    localStorage.setItem('city_y', xy[1])
     localStorage.setItem('city name', city)
+    localStorage.setItem('xy',xy);
     return xy;
   } catch (e) { console.log(e) }
 }
@@ -106,10 +105,10 @@ function Restart_anime() {
 }
 
 function Refill_data() {
-  Restart_anime()
+  Restart_anime();
   background_theme();
-  maxmin_temp_level();
   forcast_data_fill();
+  maxmin_temp_level();
 }
 
 
@@ -127,13 +126,6 @@ async function city_select() {
   main.style.filter = "blur(5px)";
   document.body.querySelector('button').style.filter = "blur(5px)";
 
-  let anime = () => {
-    city_box.style.transform = "scale(0)";
-    city_box.style.opacity = "0";
-    main.style.filter = 'blur(0)';
-    document.body.querySelector('button').style.filter = "blur(0px)";
-  }
-
   city_box.querySelector('button').addEventListener('click', (async() => {
     anime();
     Refill_animation();
@@ -148,6 +140,14 @@ async function city_select() {
     }
   }))
 }
+
+let anime = () => {
+  city_box.style.transform = "scale(0)";
+  city_box.style.opacity = "0";
+  main.style.filter = 'blur(0)';
+  document.body.querySelector('button').style.filter = "blur(0px)";
+}
+
 
 function Refill_animation() {
   temp.style.transform = "scale(1)";
@@ -176,7 +176,11 @@ city_box.querySelector('ul').addEventListener('click', (e)=>{
 async function live_loca(){
   if(navigator.geolocation){
     navigator.geolocation.getCurrentPosition((ans)=>{
-      let xy = await [ans.coords.latitude, ans.coords.longitude]
+      let xy = [ans.coords.latitude, ans.coords.longitude]
+      anime();
+      Refill_animation();
+      localStorage.setItem('city name', 'Live loca..')
+      localStorage.setItem('xy',xy);
       return fech_wea_data(xy);
     },(e)=>{console.log(e)})
   }

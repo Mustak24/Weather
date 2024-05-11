@@ -1,4 +1,4 @@
-import data from './in_city.json' assert{type:'json'};
+import data from './in.json' assert{type:'json'};
 const list = document.getElementById('city_box');
 
 var city = []
@@ -26,6 +26,6 @@ list.querySelector('input').addEventListener('keyup', ()=>{
 });
 
 
-document.getElementById('Refresh').addEventListener('click', (async()=>{
-    fech_wea_data(await city_xy(localStorage.getItem('city name')))
-}))
+document.getElementById('Refresh').addEventListener('click', ()=>{
+    fech_wea_data(localStorage.getItem('xy'))
+})
